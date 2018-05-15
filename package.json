@@ -1,0 +1,20 @@
+{
+  "name": "finer-gifs-lambda",
+  "version": "1.0.0",
+  "description": "Lambda function to respond to the Finer Gifs Club Slack command",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "node-lambda deploy -f deploy.env"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "dotenv": "^5.0.1",
+    "esm": "^3.0.34"
+  },
+  "devDependencies": {
+    "node-lambda": "^0.11.7"
+  }
+}
