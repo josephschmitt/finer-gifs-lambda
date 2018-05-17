@@ -2,6 +2,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import hashtag from 'hashtag';
 import path from 'path';
+import stripIndent from 'strip-indent';
 
 import {WebClient} from '@slack/client';
 
@@ -12,6 +13,19 @@ import searchFinerGifs from './lib/searchFinerGifs.js';
 const client = new WebClient();
 const clientId = process.env.SLACK_CLIENT_ID;
 const clientSecret = process.env.SLACK_CLIENT_SECRET
+
+const HELP_TEXT = `
+  Try searching for your favorite quote from the The Office:
+    \`/finer-gifs talk smack\`
+
+  This will post the top search result for whatever query you submitted. If you
+  want to add a little randomness into your life, you can grab a random result:
+    \`/finer-gifs talk smack #random\`
+
+  Or, if you're risk-averse and want complete control over what gif gets posted
+  in your good name:
+    \`/finer-gifs talk smack #select\`
+`;
 
 export default async function (event, context, callback) {
   try {
@@ -57,6 +71,16 @@ export default async function (event, context, callback) {
     if (requestData.text) {
       const {tokens, tags} = hashtag.parse(requestData.text);
       const query = tokens.reduce((val, tok) => val + (tok.text || ''), '').trim();
+
+      if (query === 'help') {
+        return callback(null, {
+          statusCode: 200,
+          body: JSON.stringify({
+            response_type: 'ephemeral',
+            text: stripIndent(HELP_TEXT).trim(),
+          }),
+        })
+      }
 
       const {results, hits} = await searchFinerGifs(query, tags);
 
