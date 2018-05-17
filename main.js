@@ -20,11 +20,11 @@ const HELP_TEXT = `
 
   This will post the top search result for whatever query you submitted. If you
   want to add a little randomness into your life, you can grab a random result:
-    \`/finer-gifs talk smack #random\`
+    \`/finer-gifs talk smack #random (or #shuffle)\`
 
   Or, if you're risk-averse and want complete control over what gif gets posted
   in your good name:
-    \`/finer-gifs talk smack #select\`
+    \`/finer-gifs talk smack #select (or #choose)\`
 `;
 
 export default async function (event, context, callback) {
@@ -40,16 +40,16 @@ export default async function (event, context, callback) {
     if (requestData.type === 'url_verification') {
       return callback(null, {statusCode: 200, body: requestData.challenge});
     } else if (requestData.type === 'interactive_message') {
-      callback(null, {statusCode: 200});
-
       const [action] = requestData.actions;
       const message = {
-        replace_original: true,
+        replace_original: false,
+        delete_original: true,
+        response_type: 'in_channel',
         attachments: [JSON.parse(action.value)],
       };
 
-      console.log('POST ' + requestData.response_url, JSON.stringify({data: message}))
-      return axios.post(requestData.response_url, {data: message});
+      await axios.post(requestData.response_url, message);
+      return callback(null, {statusCode: 200});
     } else if (requestData.code) {
       const resp = await client.oauth.access({
         client_id: clientId,
