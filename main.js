@@ -1,8 +1,12 @@
+import axios from 'axios';
 import dotenv from 'dotenv';
+import hashtag from 'hashtag';
 import path from 'path';
 
 import {WebClient} from '@slack/client';
 
+import formatAttachment from './lib/formatAttachment.js';
+import getRequestData from './lib/getRequestData.js';
 import searchFinerGifs from './lib/searchFinerGifs.js';
 
 const client = new WebClient();
@@ -17,58 +21,74 @@ export default async function (event, context, callback) {
       });
     }
 
-    if (event.type === 'url_verification') {
-      return callback(null, event.challenge);
-    } else if (event.queryStringParameters && event.queryStringParameters.code) {
-      const {code} = event.queryStringParameters;
+    const requestData = getRequestData(event);
+
+    if (requestData.type === 'url_verification') {
+      return callback(null, {statusCode: 200, body: requestData.challenge});
+    } else if (requestData.type === 'interactive_message') {
+      callback(null, {statusCode: 200});
+
+      const [action] = requestData.actions;
+      const message = {
+        replace_original: true,
+        attachments: [JSON.parse(action.value)],
+      };
+
+      console.log('POST ' + requestData.response_url, JSON.stringify({data: message}))
+      return axios.post(requestData.response_url, {data: message});
+    } else if (requestData.code) {
       const resp = await client.oauth.access({
         client_id: clientId,
         client_secret: clientSecret,
-        code
+        code: requestData.code,
       });
 
-      callback(null, {
+      return callback(null, {
         statusCode: 302,
         headers: {
           Location: process.env.SITE_BASE_URL,
         },
-        body: JSON.stringify(resp)
+        body: JSON.stringify(resp),
       });
-    } else if (event.token !== process.env.SLACK_VERIFICATION_TOKEN) {
-      return callback();
+    } else if (requestData.token !== process.env.SLACK_VERIFICATION_TOKEN) {
+      return callback(null, {statusCode: 403, body: 'Forbidden'});
     }
 
-    if (event.text) {
-      const {results, hits} = await searchFinerGifs(event.text);
-      const [result] = results;
+    if (requestData.text) {
+      const {tokens, tags} = hashtag.parse(requestData.text);
+      const query = tokens.reduce((val, tok) => val + (tok.text || ''), '').trim();
 
-      if (!result) {
+      const {results, hits} = await searchFinerGifs(query, tags);
+
+      if (!results.length) {
         return callback(null, {
-          response_type: 'ephemeral',
-          text: `No results for ‘${event.text}’`
+          statusCode: 200,
+          body: JSON.stringify({
+            response_type: 'ephemeral',
+            text: `No results for ‘${query}’`,
+          }),
         });
       }
 
-      const {text, fileid} = result.fields;
-      const image_url = `${process.env.CDN_BASE_URL}/${fileid}.gif`;
+      let response_type = 'in_channel';
+      if (tags.includes('select') || tags.includes('choose')) {
+        response_type = 'ephemeral';
+      }
 
       return callback(null, {
-        response_type: 'in_channel',
-        attachments: [{
-          pretext: text,
-          title: `${event.text} (${hits.found} result${hits.found !== 1 ? 's' : ''})`,
-          title_link: `${process.env.SITE_BASE_URL}?q=${event.text}`,
-          image_url,
-        }]
+        statusCode: 200,
+        body: JSON.stringify({
+          response_type,
+          attachments: results.slice(0, 5).map(({fields}) => {
+            return formatAttachment(query, fields, hits.found, results.length > 1);
+          }),
+        }),
       });
     }
 
     // Default response
-    callback(null, {});
+    callback(null, {statusCode: 200});
   } catch (e) {
-    callback(null, {
-      statusCode: 500,
-      body: JSON.stringify(e),
-    });
+    callback(e);
   }
 }

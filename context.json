@@ -1,1 +1,15 @@
-{}
+{
+  "callbackWaitsForEmptyEventLoop": "getter/setter",
+  "done": "function",
+  "succeed": "function",
+  "fail": "function",
+  "logGroupName": "/aws/lambda/finerGifsClubSlashCommand-staging",
+  "logStreamName": "2018/05/17/[$LATEST]664a8f8c1a2542748fade9073c63485d",
+  "functionName": "finerGifsClubSlashCommand-staging",
+  "memoryLimitInMB": "128",
+  "functionVersion": "$LATEST",
+  "getRemainingTimeInMillis": "function",
+  "invokeid": "03038f19-5984-11e8-9a17-f5d8fae36c9c",
+  "awsRequestId": "03038f19-5984-11e8-9a17-f5d8fae36c9c",
+  "invokedFunctionArn": "arn:aws:lambda:us-east-1:697830156387:function:finerGifsClubSlashCommand-staging"
+}

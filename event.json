@@ -1,2 +1,13 @@
 {
+  "token": "NB2oP4I5Wcjh71sNaOB0OvcY",
+  "team_id": "T0251KP1Y",
+  "team_domain": "eyepatch",
+  "channel_id": "DAPP7MALA",
+  "channel_name": "directmessage",
+  "user_id": "U0251DGEB",
+  "user_name": "joe",
+  "command": "/finer-gifs",
+  "text": "michael #shuffle",
+  "response_url": "https://hooks.slack.com/commands/T0251KP1Y/363707705555/gvFV3jmLflveOaYyMJtkivrL",
+  "trigger_id": "364854977527.2171669066.181265493faf1c6b10519eba5cd2b50a"
 }
