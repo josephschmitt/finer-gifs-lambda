@@ -17,7 +17,8 @@
     "hashtag": "0.0.1",
     "lodash.shuffle": "^4.2.0",
     "qs": "^6.5.2",
-    "strip-indent": "^2.0.0"
+    "strip-indent": "^2.0.0",
+    "unescape": "^1.0.1"
   },
   "devDependencies": {
     "node-lambda": "^0.11.7"

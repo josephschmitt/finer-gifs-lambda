@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import hashtag from 'hashtag';
 import path from 'path';
 import stripIndent from 'strip-indent';
+import unescape from 'unescape';
 
 import {WebClient} from '@slack/client';
 
@@ -41,11 +42,13 @@ export default async function (event, context, callback) {
       return callback(null, {statusCode: 200, body: requestData.challenge});
     } else if (requestData.type === 'interactive_message') {
       const [action] = requestData.actions;
+      const value = JSON.parse(action.value);
+      value.pretext = unescape(value.pretext);
       const message = {
         replace_original: false,
         delete_original: true,
         response_type: 'in_channel',
-        attachments: [JSON.parse(action.value)],
+        attachments: [value],
       };
 
       await axios.post(requestData.response_url, message);
@@ -103,8 +106,9 @@ export default async function (event, context, callback) {
         statusCode: 200,
         body: JSON.stringify({
           response_type,
+          delete_original: response_type === 'in_channel',
           attachments: results.slice(0, 5).map(({fields}) => {
-            return formatAttachment(query, fields, hits.found, results.length > 1);
+            return formatAttachment(query, fields, hits.found, results.length > 1, requestData);
           }),
         }),
       });
