@@ -6,7 +6,7 @@ import unescape from 'unescape';
 
 import {WebClient} from '@slack/client';
 
-import buildSearchResponseMsg from './lib/buildSearchResponseMsg.js';
+import buildSearchResponseMsg, {HELP_TEXT} from './lib/buildSearchResponseMsg.js';
 import getRequestData from './lib/getRequestData.js';
 
 const client = new WebClient();
