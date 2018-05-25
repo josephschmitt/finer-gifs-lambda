@@ -1,12 +1,11 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import path from 'path';
-import stripIndent from 'strip-indent';
 import unescape from 'unescape';
 
 import {WebClient} from '@slack/client';
 
-import buildSearchResponseMsg, {HELP_TEXT} from './lib/buildSearchResponseMsg.js';
+import buildSearchResponseMsg from './lib/buildSearchResponseMsg.js';
 import getRequestData from './lib/getRequestData.js';
 
 const client = new WebClient();
@@ -77,16 +76,6 @@ export default async function (event, context, callback) {
     }
 
     if (requestData.text) {
-      if (requestData.text === 'help') {
-        return callback(null, {
-          statusCode: 200,
-          body: JSON.stringify({
-            response_type: 'ephemeral',
-            text: stripIndent(HELP_TEXT).trim(),
-          }),
-        })
-      }
-
       return callback(null, {
         statusCode: 200,
         body: JSON.stringify(await buildSearchResponseMsg(requestData.text, requestData.user_id)),
