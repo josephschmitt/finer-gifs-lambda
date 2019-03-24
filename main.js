@@ -43,8 +43,8 @@ export default async function (event) {
       }
 
       const value = JSON.parse(action.value);
-      value.pretext = unescape(value.pretext);
       const message = {
+        text: unescape(value.link),
         replace_original: false,
         delete_original: true,
         response_type: 'in_channel',
