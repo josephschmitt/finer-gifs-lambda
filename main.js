@@ -85,6 +85,7 @@ export default async function (event) {
     // Default response
     return {statusCode: 200};
   } catch (e) {
+    console.error(e);
     return e;
   }
 }

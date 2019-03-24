@@ -4,7 +4,8 @@
   "description": "Lambda function to respond to the Finer Gifs Club Slack command",
   "main": "index.js",
   "scripts": {
-    "deploy": "node-lambda deploy -f deploy.env"
+    "deploy": "node-lambda deploy -f deploy.env",
+    "test": "node-lambda run"
   },
   "keywords": [],
   "author": "",
