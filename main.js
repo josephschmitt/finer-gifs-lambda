@@ -48,7 +48,9 @@ export default async function (event) {
         replace_original: false,
         delete_original: true,
         response_type: 'in_channel',
-        attachments: [value],
+        attachments: [Object.assign(value, {
+          author_name: `<@${requestData.user.id}>`,
+        })],
       };
 
       await axios.post(requestData.response_url, message);
