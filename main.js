@@ -12,7 +12,7 @@ const client = new WebClient();
 const clientId = process.env.SLACK_CLIENT_ID;
 const clientSecret = process.env.SLACK_CLIENT_SECRET
 
-export default async function (event, context, callback) {
+export default async function (event) {
   try {
     if (!process.env.SLACK_VERIFICATION_TOKEN) {
       dotenv.config({
@@ -23,7 +23,7 @@ export default async function (event, context, callback) {
     const requestData = getRequestData(event);
 
     if (requestData.type === 'url_verification') {
-      return callback(null, {statusCode: 200, body: requestData.challenge});
+      return {statusCode: 200, body: requestData.challenge};
     }
 
     if (requestData.type === 'interactive_message') {
@@ -32,14 +32,14 @@ export default async function (event, context, callback) {
       if (requestData.callback_id === 'load_or_cancel') {
         if (!action.value) {
           await axios.post(requestData.response_url, {delete_original: true});
-          return callback(null, {statusCode: 200});
+          return {statusCode: 200};
         }
 
         const value = JSON.parse(action.value);
         const msg = await buildSearchResponseMsg(value.text, requestData.user.id, value.start);
 
         await axios.post(requestData.response_url, msg);
-        return callback(null, {statusCode: 200});
+        return {statusCode: 200};
       }
 
       const value = JSON.parse(action.value);
@@ -52,7 +52,7 @@ export default async function (event, context, callback) {
       };
 
       await axios.post(requestData.response_url, message);
-      return callback(null, {statusCode: 200});
+      return {statusCode: 200};
     }
 
     if (requestData.code) {
@@ -62,29 +62,29 @@ export default async function (event, context, callback) {
         code: requestData.code,
       });
 
-      return callback(null, {
+      return {
         statusCode: 302,
         headers: {
           Location: process.env.SITE_BASE_URL,
         },
         body: JSON.stringify(resp),
-      });
+      };
     }
 
     if (requestData.token !== process.env.SLACK_VERIFICATION_TOKEN) {
-      return callback(null, {statusCode: 403, body: 'Forbidden'});
+      return {statusCode: 403, body: 'Forbidden'};
     }
 
     if (requestData.text) {
-      return callback(null, {
+      return {
         statusCode: 200,
         body: JSON.stringify(await buildSearchResponseMsg(requestData.text, requestData.user_id)),
-      });
+      };
     }
 
     // Default response
-    callback(null, {statusCode: 200});
+    return {statusCode: 200};
   } catch (e) {
-    callback(e);
+    return e;
   }
 }
